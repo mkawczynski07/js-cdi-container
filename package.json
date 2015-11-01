@@ -1,0 +1,13 @@
+{
+    "name": "js-cdi-container",
+    "version": "1.0.0",
+    "keywords": ["cdi"],
+    "author": "naza",
+    "contributors": [],
+    "dependencies": {},
+    "devDependencies": {
+        "gulp": "3.8.10",
+        "mocha": "2.2.5",
+        "gulp-mocha": "2.1.1"
+    }
+}
