@@ -1,4 +1,4 @@
-(function () {
+(function (module) {
     
     var Container = function () {
         var me = this, definitions = {}, instances = {};
