@@ -65,10 +65,28 @@ describe('#cdi container test', function () {
             }
         ]);
 
+        container.add('test4', ['test3', 'test', 'test2', function (test3) {
+                createdInstanceCounter += 1;
+            }
+        ]);
 
         container.run();
 
-        assert.equal(createdInstanceCounter, 3);
+        assert.equal(createdInstanceCounter, 4);
+
+    });
+
+    it('should create returned instance', function () {
+
+        container.add('test', [function () {
+                this.b = 2;
+                return  {b: 1};
+            }
+        ]);
+
+        container.run();
+
+        assert.equal(container.get('test').b, 1);
 
     });
 
