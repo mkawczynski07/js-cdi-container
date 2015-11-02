@@ -1,21 +1,25 @@
 (function (module) {
-    
+
     var Container = function () {
         var me = this, definitions = {}, instances = {};
-        
+
         me.add = function (name, definition) {
-            var instanceConstructorIndex = definition.length - 1;
-            definitions[name] = {
-                fn: definition[instanceConstructorIndex],
-                dependencies: definition.slice(0, instanceConstructorIndex),
-                name: name
-            };
+            createDefinition(name, definition);
         };
-        
+
+        me.producer = function (name, definitionArray) {
+            createDefinition(name, definitionArray);
+            definitions[name].isProducer = true;
+        };
+
         me.get = function (name) {
+            var definition = definitions[name];
+            if (isProducer(definition)) {
+                return createInstance(definition);
+            }
             return instances[name];
         };
-        
+
         me.run = function () {
             var name, definition;
             for (name in definitions) {
@@ -23,15 +27,39 @@
                 createInstance(definition);
             }
         };
-        
+
+        function createDefinition(name, definition) {
+            var instanceConstructorIndex = definition.length - 1;
+            definitions[name] = {
+                fn: definition[instanceConstructorIndex],
+                dependencies: definition.slice(0, instanceConstructorIndex),
+                name: name
+            };
+        }
+
         function createInstance(definition) {
+            if (isProducer(definition)) {
+                return createInstanceFromProducer(definition);
+            }
+            return createServiceInstance(definition);
+        }
+
+        function isProducer(definition) {
+            return definition.isProducer === true;
+        }
+
+        function createInstanceFromProducer(definition) {
+            return definition.fn.apply(definition, resolveDependencies(definition));
+        }
+
+        function createServiceInstance(definition) {
             var temporary, instance = Object.create(definition.fn.prototype);
             temporary = definition.fn.apply(instance, resolveDependencies(definition));
             instance = typeof temporary !== 'undefined' ? temporary : instance;
             instances[definition.name] = instance;
             return instance;
         }
-        
+
         function resolveDependencies(definition) {
             var currentDeps = [], requiredDependiencies = definition.dependencies || [],
                     length = requiredDependiencies.length, x = 0, dependience, instance;
@@ -46,13 +74,13 @@
             }
             return currentDeps;
         }
-        
+
         function isInstanceExists(name) {
             return typeof instances[name] !== 'undefined';
         }
-        
+
     };
-    
+
     module.exports = new Container();
-    
+
 })(module);

@@ -90,4 +90,39 @@ describe('#cdi container test', function () {
 
     });
 
+    it('should create new instance on each call', function () {
+
+        var producedInstances = 0;
+
+        container.add('test', [function () {
+                this.b = 2;
+            }
+        ]);
+
+        container.producer('producer', ['test', function (test) {
+                return function () {
+                    producedInstances += 1;
+                    return {a: test.b};
+                };
+            }
+        ]);
+
+        container.add('test2', ['producer', function (producer) {
+                assert.equal(producer().a, 2);
+            }
+        ]);
+
+        container.add('test3', ['producer', function (producer) {
+                assert.equal(producer().a, 2);
+            }
+        ]);
+
+        container.run();
+
+        assert.equal(producedInstances, 2);
+        assert.equal(container.get('producer')().a, 2);
+        assert.equal(producedInstances, 3);
+
+    });
+
 });
