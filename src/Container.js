@@ -12,6 +12,10 @@
             definitions[name].isProducer = true;
         };
 
+        me.constant = function (name, object) {
+            instances[name] = object;
+        };
+
         me.get = function (name) {
             var definition = definitions[name];
             if (isProducer(definition)) {
@@ -53,10 +57,14 @@
         }
 
         function createServiceInstance(definition) {
-            var temporary, instance = Object.create(definition.fn.prototype);
+            var name = definition.name, temporary, instance;
+            if (isInstanceExists(name)) {
+                return instances[name];
+            }
+            instance = Object.create(definition.fn.prototype);
             temporary = definition.fn.apply(instance, resolveDependencies(definition));
             instance = typeof temporary !== 'undefined' ? temporary : instance;
-            instances[definition.name] = instance;
+            instances[name] = instance;
             return instance;
         }
 
@@ -81,6 +89,6 @@
 
     };
 
-    module.exports = new Container();
+    module.exports = Container;
 
 })(module);

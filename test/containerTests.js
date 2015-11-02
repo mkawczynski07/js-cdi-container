@@ -1,6 +1,9 @@
-var assert = require('assert');
+var assert = require('assert'),
+        ContainerClass = require('../src/Container'), container;
 
-var container = require('../src/Container');
+beforeEach(function () {
+    container = new ContainerClass();
+});
 
 describe('#cdi container test', function () {
     it('should resolve simple class dependencies ', function () {
@@ -122,6 +125,32 @@ describe('#cdi container test', function () {
         assert.equal(producedInstances, 2);
         assert.equal(container.get('producer')().a, 2);
         assert.equal(producedInstances, 3);
+
+    });
+
+    it('should inject constant', function () {
+
+        var testConstant = {
+            a: 1,
+            b: 2
+        };
+
+        container.constant('test', testConstant);
+
+        container.add('test3', ['test', function (testConstant) {
+                console.log(testConstant);
+                assert.equal(testConstant.a, 1);
+                assert.equal(testConstant.b, 2);
+            }
+        ]);
+
+        container.add('test4', ['test', function (testConstant) {
+                assert.equal(testConstant.a, 1);
+                assert.equal(testConstant.b, 2);
+            }
+        ]);
+
+        container.run();
 
     });
 
