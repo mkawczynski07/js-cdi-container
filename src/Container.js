@@ -18,8 +18,11 @@
 
         me.get = function (name) {
             var definition = definitions[name];
+            if (typeof definition === 'undefined') {
+                return  instances[name];
+            }
             if (isProducer(definition)) {
-                return createInstance(definition);
+                return createInstanceFromProducer(definition);
             }
             return instances[name];
         };
